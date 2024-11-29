@@ -19,11 +19,12 @@ app.get("/", (req, res) => {
     });
     response.on("end", () => {
       const body = JSON.parse(data);
-      console.log(`Logging body at the end of the GET request ${body}`);
+      console.log(`Logging body at the end of the GET request: ${body}`);
     });
   });
 
-  console.dir(`Incoming Request from IP : ${req.ip}`);
+  console.dir(`Incoming Request from IP: ${req.ip}`);
+  console.dir(`Type of incoming req.ip is: ${typeof req.ip}`);
 
   requestToWeb.on("error", (error) => {
     console.log("An error", error);
