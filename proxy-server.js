@@ -73,7 +73,7 @@ app.get("/captcha", (req, res) => {
 
 app.get("/", (req, res) => {
   console.log(recaptchaKey);
-  const RPS_LIMIT = 1;
+  const RPS_LIMIT = process.env.RPS_LIMIT;
   const clientIP = req.ip;
   const timestamp = Date.now();
   let clientData = ipTracker.get(clientIP);
