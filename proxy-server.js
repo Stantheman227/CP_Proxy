@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const path = require("path");
 const port = 3001;
 const http = require("http");
 
@@ -12,8 +13,12 @@ function requestingIP(address, timestamp) {
   this.requestCounts = [];
 }
 
+app.get("/captcha", (req, res) => {
+  res.sendFile(path.join(__dirname, `captcha.html`));
+});
+
 app.get("/", (req, res) => {
-  const RPS_LIMIT = 5;
+  const RPS_LIMIT = 1;
   const clientIP = req.ip;
   const timestamp = Date.now();
   let clientData = ipTracker.get(clientIP);
@@ -52,24 +57,7 @@ app.get("/", (req, res) => {
   ) {
     console.log(`Too many requests, please solve the captcha to proceed`);
 
-    const requestToCaptcha = http.request(options_captcha_html, (response) => {
-      // Request from Proxy to get Captcha_HTML
-      let data = "";
-
-      response.on("data", (chunk) => {
-        data = data + chunk.toString();
-      });
-
-      response.on("end", () => {
-        res.send(data);
-        console.log("Sending Captcha_HTML data to client");
-      });
-    });
-
-    requestToCaptcha.on("error", (error) => {
-      console.log("An error", error);
-    });
-    requestToCaptcha.end();
+    res.redirect("/captcha");
   } else {
     try {
       const requestToWeb = http.request(options, (response) => {

@@ -7,10 +7,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, `index.html`));
 });
 
-app.get("/captcha", (req, res) => {
-  res.sendFile(path.join(__dirname, `captcha.html`));
-});
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
