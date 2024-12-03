@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
     host: "localhost",
     port: 3000,
     path: "/",
-    methos: "GET",
+    method: "GET",
   };
 
   if (!clientData) {
@@ -53,8 +53,8 @@ app.get("/", (req, res) => {
           data = data + chunk.toString();
         });
         response.on("end", () => {
-          const body = JSON.parse(data);
-          console.log(`Logging body at the end of the GET request: ${body}`);
+          res.send(data);
+          console.log(data);
         });
       });
 
