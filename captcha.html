@@ -4,13 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Moin, warte mal!</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
     <h1>Moin, warte mal. Ich habe ein kleines Problemchen, dass du lösen musst bevor du weiter kannst :D</h1>
-    <form>
-
+    <form action="/verify" method="POST">
+        <div class="g-recaptcha" data-sitekey="6LdVhZEqAAAAAGDG3O-f76ceNHtDQdAmxPRFC1Mj"></div>
+        <input type="submit" value="Submit" />
     </form>
+
 
 </body>
 
