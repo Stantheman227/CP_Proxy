@@ -25,6 +25,13 @@ app.get("/", (req, res) => {
     method: "GET",
   };
 
+  const options_captcha_html = {
+    host: "localhost",
+    port: 3000,
+    path: "/captcha",
+    method: "GET",
+  };
+
   if (!clientData) {
     // check if IP has already been logged
     clientData = new requestingIP(clientIP, timestamp);
@@ -44,6 +51,25 @@ app.get("/", (req, res) => {
     RPS_LIMIT
   ) {
     console.log(`Too many requests, please solve the captcha to proceed`);
+
+    const requestToCaptcha = http.request(options_captcha_html, (response) => {
+      // Request from Proxy to get Captcha_HTML
+      let data = "";
+
+      response.on("data", (chunk) => {
+        data = data + chunk.toString();
+      });
+
+      response.on("end", () => {
+        res.send(data);
+        console.log("Sending Captcha_HTML data to client");
+      });
+    });
+
+    requestToCaptcha.on("error", (error) => {
+      console.log("An error", error);
+    });
+    requestToCaptcha.end();
   } else {
     try {
       const requestToWeb = http.request(options, (response) => {
