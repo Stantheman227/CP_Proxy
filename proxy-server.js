@@ -13,9 +13,17 @@ function requestingIP(address, timestamp) {
 }
 
 app.get("/", (req, res) => {
+  const RPS_LIMIT = 5;
   const clientIP = req.ip;
   const timestamp = Date.now();
   let clientData = ipTracker.get(clientIP);
+
+  const options = {
+    host: "localhost",
+    port: 3000,
+    path: "/",
+    methos: "GET",
+  };
 
   if (!clientData) {
     // check if IP has already been logged
@@ -25,39 +33,39 @@ app.get("/", (req, res) => {
 
   // If IP is already known push the current timestamp in the requestCounts Array
   clientData.requestCounts.push(timestamp);
+
   console.log(
     `Request from IP: ${clientIP}, total requests: ${clientData.requestCounts.length}`
   );
 
-  console.dir(ipTracker);
-  console.dir(ipTracker.get(clientIP));
-  console.log(`Logging client Data: ${clientData}`);
-  console.log(`New Request with IP : ${clientIP} and timestamp: ${timestamp}`);
+  // Checking amount for current IP's requests in the last second
+  if (
+    clientData.requestCounts.filter((time) => timestamp - time <= 1000).length >
+    RPS_LIMIT
+  ) {
+    console.log(`Too many requests, please solve the captcha to proceed`);
+  } else {
+    try {
+      const requestToWeb = http.request(options, (response) => {
+        // Request from Proxy to Web to get data instead of redir
+        let data = "";
+        response.on("data", (chunk) => {
+          data = data + chunk.toString();
+        });
+        response.on("end", () => {
+          const body = JSON.parse(data);
+          console.log(`Logging body at the end of the GET request: ${body}`);
+        });
+      });
 
-  const options = {
-    host: "localhost",
-    port: 3000,
-    path: "/",
-    methos: "GET",
-  };
-  const requestToWeb = http.request(options, (response) => {
-    // Request from Proxy to Web to get data instead of redir
-    let data = "";
-    response.on("data", (chunk) => {
-      data = data + chunk.toString();
-    });
-    response.on("end", () => {
-      const body = JSON.parse(data);
-      console.log(`Logging body at the end of the GET request: ${body}`);
-    });
-  });
-
-  console.log(`Incoming Request from IP: ${req.ip}`);
-
-  requestToWeb.on("error", (error) => {
-    console.log("An error", error);
-  });
-  requestToWeb.end();
+      requestToWeb.on("error", (error) => {
+        console.log("An error", error);
+      });
+      requestToWeb.end();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 });
 
 app.listen(port, () => {
